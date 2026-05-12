@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { FolderOpen, Upload, FileBox } from 'lucide-vue-next'
+import { FolderOpen, FileBox } from 'lucide-vue-next'
 import { useSceneStore } from '../../stores/sceneStore'
 import { useEditorStore } from '../../stores/editorStore'
 
@@ -69,46 +69,34 @@ async function handleFiles(files: FileList) {
     }
   }
 }
+
+defineExpose({ openFileDialog })
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-editor-panel">
-    <!-- Header -->
-    <div class="h-7 flex items-center px-3 border-b border-editor-border text-xs font-semibold text-editor-text-secondary uppercase tracking-wider shrink-0">
-      Assets
-      <div class="flex-1" />
-      <button @click="openFileDialog" class="p-0.5 text-editor-text-muted hover:text-editor-text" title="Import">
-        <Upload :size="12" />
-      </button>
+  <div
+    class="h-full overflow-y-auto"
+    @drop="onDrop"
+    @dragover="onDragOver"
+    @dragleave="onDragLeave"
+  >
+    <div
+      v-if="importedAssets.length === 0"
+      class="px-4 py-10 text-center text-editor-text-muted text-sm"
+      :class="isDragOver ? 'bg-editor-accent/10 focus-visible:[box-shadow:var(--focus-ring)] rounded-[var(--radius-2)]' : ''"
+    >
+      <FolderOpen :size="26" class="mx-auto mb-3 opacity-60" />
+      <p>Drop 3D models or textures here<br>(.glb, .gltf, .obj, .png, .jpg)</p>
     </div>
 
-    <!-- Content -->
-    <div
-      class="flex-1 overflow-y-auto"
-      @drop="onDrop"
-      @dragover="onDragOver"
-      @dragleave="onDragLeave"
-    >
-      <!-- Drop zone when empty -->
+    <div v-else class="p-2">
       <div
-        v-if="importedAssets.length === 0"
-        class="px-3 py-8 text-center text-editor-text-muted text-xs"
-        :class="isDragOver ? 'bg-editor-accent/10 ring-2 ring-editor-accent ring-inset rounded' : ''"
+        v-for="asset in importedAssets"
+        :key="asset"
+        class="flex items-center gap-2 px-3 py-2 text-sm text-editor-text hover:bg-editor-hover rounded-[var(--radius-1)] cursor-default"
       >
-        <FolderOpen :size="24" class="mx-auto mb-2 opacity-50" />
-        <p>Drop 3D models or textures here<br>(.glb, .gltf, .obj, .png, .jpg)</p>
-      </div>
-
-      <!-- Asset list -->
-      <div v-else class="p-1">
-        <div
-          v-for="asset in importedAssets"
-          :key="asset"
-          class="flex items-center gap-2 px-2 py-1 text-xs text-editor-text hover:bg-editor-hover rounded cursor-default"
-        >
-          <FileBox :size="14" class="text-editor-text-muted shrink-0" />
-          <span class="truncate">{{ asset }}</span>
-        </div>
+        <FileBox :size="16" class="text-editor-text-muted shrink-0" />
+        <span class="truncate">{{ asset }}</span>
       </div>
     </div>
   </div>

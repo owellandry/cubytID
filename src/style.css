@@ -1,32 +1,100 @@
 @import "tailwindcss";
 
 @theme {
-  --color-editor-bg: #1e1e2e;
-  --color-editor-surface: #252536;
-  --color-editor-panel: #181825;
-  --color-editor-hover: #313244;
-  --color-editor-active: #45475a;
-  --color-editor-border: #313244;
-  --color-editor-text: #cdd6f4;
-  --color-editor-text-secondary: #a6adc8;
-  --color-editor-text-muted: #6c7086;
-  --color-editor-accent: #89b4fa;
-  --color-editor-accent-hover: #74c7ec;
-  --color-editor-warning: #f9e2af;
-  --color-editor-error: #f38ba8;
-  --color-editor-success: #a6e3a1;
+  --color-editor-bg: var(--surface-app);
+  --color-editor-surface: var(--surface-2);
+  --color-editor-panel: var(--surface-1);
+  --color-editor-hover: var(--interactive-hover);
+  --color-editor-active: var(--interactive-active);
+  --color-editor-border: var(--border-1);
+  --color-editor-text: var(--text-1);
+  --color-editor-text-secondary: var(--text-2);
+  --color-editor-text-muted: var(--text-3);
+  --color-editor-accent: var(--accent-1);
+  --color-editor-accent-hover: var(--accent-2);
+  --color-editor-warning: var(--state-warn);
+  --color-editor-error: var(--state-error);
+  --color-editor-success: var(--state-success);
+}
+
+:root {
+  color-scheme: dark;
+
+  --radius-1: 10px;
+  --radius-2: 12px;
+
+  --shadow-1: 0 1px 0 rgba(0, 0, 0, 0.35);
+  --shadow-2: 0 10px 30px rgba(0, 0, 0, 0.25);
+
+  --focus-ring: 0 0 0 3px color-mix(in oklab, var(--accent-1) 45%, transparent);
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --surface-app: #0b0e14;
+  --surface-1: #0f1420;
+  --surface-2: #121a29;
+  --surface-3: #172033;
+
+  --border-1: color-mix(in oklab, #7aa2f7 18%, #1a2236);
+
+  --text-1: #e6ebff;
+  --text-2: #b7c0e2;
+  --text-3: #7f89ad;
+
+  --accent-1: #7aa2f7;
+  --accent-2: #89dceb;
+
+  --interactive-hover: color-mix(in oklab, var(--surface-3) 85%, white 15%);
+  --interactive-active: color-mix(in oklab, var(--surface-3) 75%, white 25%);
+
+  --state-warn: #f6c177;
+  --state-error: #ff6b87;
+  --state-success: #7ee787;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+
+  --surface-app: #f7f8fc;
+  --surface-1: #ffffff;
+  --surface-2: #f1f4fb;
+  --surface-3: #e7ebf7;
+
+  --border-1: color-mix(in oklab, #3b82f6 16%, #d6dbea);
+
+  --text-1: #0b1220;
+  --text-2: #2a3857;
+  --text-3: #5a6789;
+
+  --accent-1: #2563eb;
+  --accent-2: #0ea5e9;
+
+  --interactive-hover: color-mix(in oklab, var(--surface-3) 80%, black 20%);
+  --interactive-active: color-mix(in oklab, var(--surface-3) 70%, black 30%);
+
+  --state-warn: #b45309;
+  --state-error: #be123c;
+  --state-success: #047857;
 }
 
 html, body, #app {
   @apply w-full h-full overflow-hidden bg-editor-bg text-editor-text;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  font-size: 13px;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: 14px;
+  line-height: 1.35;
 }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { @apply bg-editor-active rounded; }
-::-webkit-scrollbar-thumb:hover { @apply bg-editor-text-muted; }
+::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--border-1) 55%, transparent);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklab, var(--border-1) 80%, transparent);
+}
 
 .splitpanes__splitter {
   @apply !bg-editor-border relative;
@@ -35,10 +103,10 @@ html, body, #app {
   @apply !bg-editor-accent;
 }
 .splitpanes--vertical > .splitpanes__splitter {
-  width: 3px !important;
-  min-width: 3px !important;
+  width: 4px !important;
+  min-width: 4px !important;
 }
 .splitpanes--horizontal > .splitpanes__splitter {
-  height: 3px !important;
-  min-height: 3px !important;
+  height: 4px !important;
+  min-height: 4px !important;
 }

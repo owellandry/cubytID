@@ -66,12 +66,20 @@ export class History {
 
 export class TransformCommand implements Command {
   description: string
+  private target: any
+  private property: string
+  private oldValue: any
+  private newValue: any
   constructor(
-    private target: any,
-    private property: string,
-    private oldValue: any,
-    private newValue: any,
+    target: any,
+    property: string,
+    oldValue: any,
+    newValue: any,
   ) {
+    this.target = target
+    this.property = property
+    this.oldValue = oldValue
+    this.newValue = newValue
     this.description = `Change ${property}`
   }
 
@@ -86,11 +94,15 @@ export class TransformCommand implements Command {
 
 export class AddNodeCommand implements Command {
   description: string
+  private addFn: () => void
+  private removeFn: () => void
   constructor(
-    private addFn: () => void,
-    private removeFn: () => void,
-    private nodeName: string,
+    addFn: () => void,
+    removeFn: () => void,
+    nodeName: string,
   ) {
+    this.addFn = addFn
+    this.removeFn = removeFn
     this.description = `Add ${nodeName}`
   }
 
@@ -100,11 +112,15 @@ export class AddNodeCommand implements Command {
 
 export class RemoveNodeCommand implements Command {
   description: string
+  private addFn: () => void
+  private removeFn: () => void
   constructor(
-    private addFn: () => void,
-    private removeFn: () => void,
-    private nodeName: string,
+    addFn: () => void,
+    removeFn: () => void,
+    nodeName: string,
   ) {
+    this.addFn = addFn
+    this.removeFn = removeFn
     this.description = `Remove ${nodeName}`
   }
 

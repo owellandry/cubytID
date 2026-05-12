@@ -1,79 +1,71 @@
 <script setup lang="ts">
 import { useSceneStore } from '../../stores/sceneStore'
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import TransformEditor from '../components/TransformEditor.vue'
 import MaterialEditor from '../components/MaterialEditor.vue'
+import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import UiPanel from '../primitives/UiPanel.vue'
+import UiPanelHeader from '../primitives/UiPanelHeader.vue'
+import UiIconButton from '../primitives/UiIconButton.vue'
+import UiInput from '../primitives/UiInput.vue'
+import UiToggle from '../primitives/UiToggle.vue'
+import { layoutContextKey } from '../layout/layoutContext'
 
 const scene = useSceneStore()
+const layout = inject(layoutContextKey, null)
+const isCollapsed = computed(() => layout?.rightCollapsed.value ?? false)
 
 const selectedNode = computed(() => scene.getSelectedNode())
 const isMesh = computed(() => selectedNode.value?.type === 'mesh')
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-editor-panel">
-    <!-- Header -->
-    <div class="h-7 flex items-center px-3 border-b border-editor-border text-xs font-semibold text-editor-text-secondary uppercase tracking-wider shrink-0">
-      Inspector
-    </div>
+  <UiPanel>
+    <template #header>
+      <UiPanelHeader title="Inspector">
+        <template #actions>
+          <UiIconButton
+            v-if="layout"
+            :title="isCollapsed ? 'Expand panel' : 'Collapse panel'"
+            @click="layout.toggleRight()"
+          >
+            <component :is="isCollapsed ? ChevronLeft : ChevronRight" :size="16" />
+          </UiIconButton>
+        </template>
+      </UiPanelHeader>
+    </template>
 
     <div class="flex-1 overflow-y-auto">
-      <!-- No selection -->
-      <div v-if="!selectedNode" class="px-3 py-8 text-center text-editor-text-muted text-xs">
+      <div v-if="!selectedNode" class="px-3 py-10 text-center text-editor-text-muted text-sm">
         No object selected
       </div>
 
-      <!-- Selected object properties -->
-      <div v-else class="p-3 space-y-4">
-        <!-- Name -->
+      <div v-else class="p-4 space-y-5">
         <div>
-          <label class="block text-[10px] text-editor-text-muted mb-1 uppercase tracking-wider">Name</label>
-          <input
-            :value="selectedNode.name"
-            @change="e => scene.renameNode(selectedNode!.id, (e.target as HTMLInputElement).value)"
-            type="text"
-            class="w-full px-2 py-1 text-xs bg-editor-surface border border-editor-border rounded text-editor-text focus:border-editor-accent outline-none"
+          <label class="block text-xs text-editor-text-muted mb-2">Name</label>
+          <UiInput
+            :model-value="selectedNode.name"
+            @update:model-value="v => scene.renameNode(selectedNode!.id, v)"
           />
         </div>
 
-        <!-- Type badge -->
-        <div class="flex items-center gap-2">
-          <span class="text-[10px] text-editor-text-muted uppercase tracking-wider">Type</span>
-          <span class="text-[10px] px-2 py-0.5 rounded-full capitalize"
-            :class="{
-              'bg-editor-accent/20 text-editor-accent': selectedNode.type === 'mesh',
-              'bg-editor-warning/20 text-editor-warning': selectedNode.type === 'light',
-              'bg-editor-success/20 text-editor-success': selectedNode.type === 'camera',
-              'bg-editor-active text-editor-text-secondary': selectedNode.type === 'group',
-            }"
-          >{{ selectedNode.type }}</span>
-        </div>
-
-        <!-- Visibility toggle -->
         <div class="flex items-center justify-between">
-          <span class="text-[10px] text-editor-text-muted uppercase tracking-wider">Visible</span>
-          <button
-            @click="selectedNode!.visible = !selectedNode!.visible"
-            class="w-8 h-4 rounded-full transition-colors relative"
-            :class="selectedNode.visible ? 'bg-editor-accent' : 'bg-editor-active'"
-          >
-            <div
-              class="w-3 h-3 rounded-full bg-white absolute top-0.5 transition-all"
-              :class="selectedNode.visible ? 'left-4' : 'left-0.5'"
-            />
-          </button>
+          <div class="text-xs text-editor-text-muted">Visible</div>
+          <UiToggle
+            :model-value="selectedNode.visible"
+            aria-label="Toggle visibility"
+            @update:model-value="v => (selectedNode!.visible = v)"
+          />
         </div>
 
-        <div class="h-px bg-editor-border" />
+        <div class="h-px bg-editor-border/50" />
 
-        <!-- Transform (meshes only) -->
         <TransformEditor v-if="isMesh" />
 
-        <div v-if="isMesh" class="h-px bg-editor-border" />
+        <div v-if="isMesh" class="h-px bg-editor-border/50" />
 
-        <!-- Material (meshes only) -->
         <MaterialEditor v-if="isMesh" />
       </div>
     </div>
-  </div>
+  </UiPanel>
 </template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, provide, ref } from 'vue'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import Toolbar from './Toolbar.vue'
@@ -6,50 +7,95 @@ import StatusBar from './StatusBar.vue'
 import ViewportPanel from '../panels/ViewportPanel.vue'
 import HierarchyPanel from '../panels/HierarchyPanel.vue'
 import InspectorPanel from '../panels/InspectorPanel.vue'
-import AssetsPanel from '../panels/AssetsPanel.vue'
-import ConsolePanel from '../panels/ConsolePanel.vue'
+import BottomTabs from './BottomTabs.vue'
+import { layoutContextKey } from './layoutContext'
+
+const leftCollapsed = ref(false)
+const rightCollapsed = ref(false)
+const bottomCollapsed = ref(false)
+
+const verticalLayoutKey = ref(0)
+const horizontalLayoutKey = ref(0)
+
+const leftSize = computed(() => (leftCollapsed.value ? 6 : 22))
+const leftMin = computed(() => (leftCollapsed.value ? 6 : 14))
+const leftMax = computed(() => (leftCollapsed.value ? 10 : 32))
+
+const rightSize = computed(() => (rightCollapsed.value ? 6 : 14))
+const rightMin = computed(() => (rightCollapsed.value ? 6 : 10))
+const rightMax = computed(() => (rightCollapsed.value ? 10 : 22))
+
+const centerSize = computed(() => Math.max(40, 100 - leftSize.value - rightSize.value))
+
+const bottomSize = computed(() => (bottomCollapsed.value ? 12 : 22))
+const viewportSize = computed(() => Math.max(55, 100 - bottomSize.value))
+
+function toggleLeft() {
+  leftCollapsed.value = !leftCollapsed.value
+  verticalLayoutKey.value += 1
+}
+
+function toggleRight() {
+  rightCollapsed.value = !rightCollapsed.value
+  verticalLayoutKey.value += 1
+}
+
+function toggleBottom() {
+  bottomCollapsed.value = !bottomCollapsed.value
+  horizontalLayoutKey.value += 1
+}
+
+provide(layoutContextKey, {
+  leftCollapsed,
+  rightCollapsed,
+  bottomCollapsed,
+  toggleLeft,
+  toggleRight,
+  toggleBottom,
+})
 </script>
 
 <template>
   <div class="flex flex-col w-full h-full bg-editor-bg">
-    <!-- Toolbar -->
     <Toolbar />
 
-    <!-- Main Content -->
-    <div class="flex-1 overflow-hidden">
-      <Splitpanes class="h-full">
-        <!-- Left Panel: Hierarchy -->
-        <Pane :size="13" :min-size="8" :max-size="20">
-          <HierarchyPanel />
+    <div class="flex-1 overflow-hidden p-3">
+      <Splitpanes
+        :key="verticalLayoutKey"
+        class="h-full !bg-transparent"
+        :dbl-click-splitter="false"
+      >
+        <Pane :size="leftSize" :min-size="leftMin" :max-size="leftMax">
+          <div class="h-full pr-2">
+            <HierarchyPanel />
+          </div>
         </Pane>
 
-        <!-- Center: Viewport + Bottom panels -->
-        <Pane :size="75">
-          <Splitpanes horizontal>
-            <Pane :size="78" :min-size="50">
-              <ViewportPanel />
+        <Pane :size="centerSize">
+          <Splitpanes
+            :key="horizontalLayoutKey"
+            horizontal
+            :dbl-click-splitter="false"
+          >
+            <Pane :size="viewportSize" :min-size="55">
+              <div class="h-full pb-2">
+                <ViewportPanel />
+              </div>
             </Pane>
-            <Pane :size="22" :min-size="10">
-              <Splitpanes>
-                <Pane :size="50">
-                  <AssetsPanel />
-                </Pane>
-                <Pane :size="50">
-                  <ConsolePanel />
-                </Pane>
-              </Splitpanes>
+            <Pane :size="bottomSize" :min-size="12">
+              <BottomTabs />
             </Pane>
           </Splitpanes>
         </Pane>
 
-        <!-- Right Panel: Inspector -->
-        <Pane :size="12" :min-size="8" :max-size="20">
-          <InspectorPanel />
+        <Pane :size="rightSize" :min-size="rightMin" :max-size="rightMax">
+          <div class="h-full pl-2">
+            <InspectorPanel />
+          </div>
         </Pane>
       </Splitpanes>
     </div>
 
-    <!-- Status Bar -->
     <StatusBar />
   </div>
 </template>

@@ -1,9 +1,15 @@
 <script setup lang="ts">
 import { useSceneStore, type SceneNode } from '../../stores/sceneStore'
-import { Eye, EyeOff, ChevronRight, ChevronDown, Trash2 } from 'lucide-vue-next'
-import { ref } from 'vue'
+import { Eye, EyeOff, ChevronRight, ChevronDown, ChevronLeft, Trash2 } from 'lucide-vue-next'
+import { computed, inject, ref } from 'vue'
+import UiPanel from '../primitives/UiPanel.vue'
+import UiPanelHeader from '../primitives/UiPanelHeader.vue'
+import UiIconButton from '../primitives/UiIconButton.vue'
+import { layoutContextKey } from '../layout/layoutContext'
 
 const scene = useSceneStore()
+const layout = inject(layoutContextKey, null)
+const isCollapsed = computed(() => layout?.leftCollapsed.value ?? false)
 const expandedNodes = ref<Set<string>>(new Set())
 const dragNodeId = ref<string | null>(null)
 const dragOverNodeId = ref<string | null>(null)
@@ -54,107 +60,108 @@ function onDrop(e: DragEvent, targetId: string | null) {
 function onDropRoot(e: DragEvent) {
   onDrop(e, null)
 }
-
-function renderNodes(parentId: string | null, depth = 0): SceneNode[] {
-  return scene.getChildren(parentId)
-}
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-editor-panel">
-    <!-- Header -->
-    <div class="h-7 flex items-center px-3 border-b border-editor-border text-xs font-semibold text-editor-text-secondary uppercase tracking-wider shrink-0">
-      Hierarchy
-      <div class="flex-1" />
-      <button
-        v-if="scene.selectedNodeId"
-        @click="scene.deleteSelected()"
-        class="p-0.5 text-editor-text-muted hover:text-editor-error"
-        title="Delete selected"
-      >
-        <Trash2 :size="12" />
-      </button>
-    </div>
+  <UiPanel>
+    <template #header>
+      <UiPanelHeader title="Hierarchy">
+        <template #actions>
+          <UiIconButton
+            v-if="layout"
+            :title="isCollapsed ? 'Expand panel' : 'Collapse panel'"
+            @click="layout.toggleLeft()"
+          >
+            <component :is="isCollapsed ? ChevronRight : ChevronLeft" :size="16" />
+          </UiIconButton>
+          <UiIconButton
+            v-if="scene.selectedNodeId"
+            title="Delete selected"
+            @click="scene.deleteSelected()"
+          >
+            <Trash2 :size="16" />
+          </UiIconButton>
+        </template>
+      </UiPanelHeader>
+    </template>
 
-    <!-- Node list -->
-    <div
-      class="flex-1 overflow-y-auto py-1"
-      @dragover.prevent
-      @drop="onDropRoot"
-    >
-      <div
-        v-if="scene.nodes.length === 0"
-        class="px-3 py-8 text-center text-editor-text-muted text-xs"
-      >
-        Scene is empty.<br>Use <b>Add</b> in the toolbar.
-      </div>
-
-      <template v-for="node in scene.getChildren(null)" :key="node.id">
-        <!-- Root node -->
+    <div class="flex flex-col h-full">
+      <div class="flex-1 overflow-y-auto py-2" @dragover.prevent @drop="onDropRoot">
         <div
-          draggable="true"
-          @dragstart="e => onDragStart(e, node.id)"
-          @dragover="e => onDragOver(e, node.id)"
-          @dragleave="onDragLeave"
-          @drop.stop="e => onDrop(e, node.id)"
-          @click="scene.selectNode(node.id)"
-          class="flex items-center gap-1 px-2 py-0.5 cursor-pointer text-xs transition-colors group"
-          :class="[
-            scene.selectedNodeId === node.id
-              ? 'bg-editor-accent/20 text-editor-accent'
-              : 'text-editor-text hover:bg-editor-hover',
-            dragOverNodeId === node.id ? 'ring-1 ring-editor-accent' : ''
-          ]"
+          v-if="scene.nodes.length === 0"
+          class="px-3 py-10 text-center text-editor-text-muted text-sm"
         >
-          <button
-            v-if="hasChildren(node.id)"
-            @click.stop="toggleExpand(node.id)"
-            class="p-0 text-editor-text-muted hover:text-editor-text"
-          >
-            <component :is="expandedNodes.has(node.id) ? ChevronDown : ChevronRight" :size="12" />
-          </button>
-          <span v-else class="w-3" />
-          <span class="text-[10px] w-4 text-center">{{ getTypeIcon(node.type) }}</span>
-          <span class="flex-1 truncate">{{ node.name }}</span>
-          <button
-            @click.stop="node.visible = !node.visible"
-            class="p-0 opacity-0 group-hover:opacity-100 text-editor-text-muted hover:text-editor-text"
-          >
-            <component :is="node.visible ? Eye : EyeOff" :size="12" />
-          </button>
+          Scene is empty.<br>Use <b>Add</b> in the toolbar.
         </div>
 
-        <!-- Children -->
-        <template v-if="expandedNodes.has(node.id)">
+        <template v-for="node in scene.getChildren(null)" :key="node.id">
           <div
-            v-for="child in scene.getChildren(node.id)"
-            :key="child.id"
             draggable="true"
-            @dragstart="e => onDragStart(e, child.id)"
-            @dragover="e => onDragOver(e, child.id)"
+            @dragstart="e => onDragStart(e, node.id)"
+            @dragover="e => onDragOver(e, node.id)"
             @dragleave="onDragLeave"
-            @drop.stop="e => onDrop(e, child.id)"
-            @click="scene.selectNode(child.id)"
-            class="flex items-center gap-1 px-2 py-0.5 cursor-pointer text-xs transition-colors group pl-6"
+            @drop.stop="e => onDrop(e, node.id)"
+            @click="scene.selectNode(node.id)"
+            class="flex items-center gap-2 px-3 py-2 cursor-pointer text-sm transition-colors group"
             :class="[
-              scene.selectedNodeId === child.id
-                ? 'bg-editor-accent/20 text-editor-accent'
+              scene.selectedNodeId === node.id
+                ? 'bg-editor-accent/12 text-editor-text'
                 : 'text-editor-text hover:bg-editor-hover',
-              dragOverNodeId === child.id ? 'ring-1 ring-editor-accent' : ''
+              dragOverNodeId === node.id ? 'focus-visible:[box-shadow:var(--focus-ring)]' : ''
             ]"
           >
-            <span class="w-3" />
-            <span class="text-[10px] w-4 text-center">{{ getTypeIcon(child.type) }}</span>
-            <span class="flex-1 truncate">{{ child.name }}</span>
             <button
-              @click.stop="child.visible = !child.visible"
+              v-if="hasChildren(node.id)"
+              @click.stop="toggleExpand(node.id)"
+              :aria-label="expandedNodes.has(node.id) ? 'Collapse' : 'Expand'"
+              class="p-0 text-editor-text-muted hover:text-editor-text"
+            >
+              <component :is="expandedNodes.has(node.id) ? ChevronDown : ChevronRight" :size="14" />
+            </button>
+            <span v-else class="w-[14px]" />
+            <span class="text-xs w-5 text-center text-editor-text-muted">{{ getTypeIcon(node.type) }}</span>
+            <span class="flex-1 truncate">{{ node.name }}</span>
+            <button
+              @click.stop="node.visible = !node.visible"
+              :aria-label="node.visible ? 'Hide' : 'Show'"
               class="p-0 opacity-0 group-hover:opacity-100 text-editor-text-muted hover:text-editor-text"
             >
-              <component :is="child.visible ? Eye : EyeOff" :size="12" />
+              <component :is="node.visible ? Eye : EyeOff" :size="14" />
             </button>
           </div>
+
+          <template v-if="expandedNodes.has(node.id)">
+            <div
+              v-for="child in scene.getChildren(node.id)"
+              :key="child.id"
+              draggable="true"
+              @dragstart="e => onDragStart(e, child.id)"
+              @dragover="e => onDragOver(e, child.id)"
+              @dragleave="onDragLeave"
+              @drop.stop="e => onDrop(e, child.id)"
+              @click="scene.selectNode(child.id)"
+              class="flex items-center gap-2 px-3 py-2 cursor-pointer text-sm transition-colors group pl-8"
+              :class="[
+                scene.selectedNodeId === child.id
+                  ? 'bg-editor-accent/12 text-editor-text'
+                  : 'text-editor-text hover:bg-editor-hover',
+                dragOverNodeId === child.id ? 'focus-visible:[box-shadow:var(--focus-ring)]' : ''
+              ]"
+            >
+              <span class="w-[14px]" />
+              <span class="text-xs w-5 text-center text-editor-text-muted">{{ getTypeIcon(child.type) }}</span>
+              <span class="flex-1 truncate">{{ child.name }}</span>
+              <button
+                @click.stop="child.visible = !child.visible"
+                :aria-label="child.visible ? 'Hide' : 'Show'"
+                class="p-0 opacity-0 group-hover:opacity-100 text-editor-text-muted hover:text-editor-text"
+              >
+                <component :is="child.visible ? Eye : EyeOff" :size="14" />
+              </button>
+            </div>
+          </template>
         </template>
-      </template>
+      </div>
     </div>
-  </div>
+  </UiPanel>
 </template>
