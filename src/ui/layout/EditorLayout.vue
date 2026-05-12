@@ -14,6 +14,9 @@ const leftCollapsed = ref(false)
 const rightCollapsed = ref(false)
 const bottomCollapsed = ref(false)
 
+const verticalLayoutKey = ref(0)
+const horizontalLayoutKey = ref(0)
+
 const leftSize = computed(() => (leftCollapsed.value ? 6 : 22))
 const leftMin = computed(() => (leftCollapsed.value ? 6 : 14))
 const leftMax = computed(() => (leftCollapsed.value ? 10 : 32))
@@ -29,14 +32,17 @@ const viewportSize = computed(() => Math.max(55, 100 - bottomSize.value))
 
 function toggleLeft() {
   leftCollapsed.value = !leftCollapsed.value
+  verticalLayoutKey.value += 1
 }
 
 function toggleRight() {
   rightCollapsed.value = !rightCollapsed.value
+  verticalLayoutKey.value += 1
 }
 
 function toggleBottom() {
   bottomCollapsed.value = !bottomCollapsed.value
+  horizontalLayoutKey.value += 1
 }
 
 provide(layoutContextKey, {
@@ -55,7 +61,7 @@ provide(layoutContextKey, {
 
     <div class="flex-1 overflow-hidden p-3">
       <Splitpanes
-        :key="`${leftCollapsed}-${rightCollapsed}`"
+        :key="verticalLayoutKey"
         class="h-full !bg-transparent"
         :dbl-click-splitter="false"
       >
@@ -67,7 +73,7 @@ provide(layoutContextKey, {
 
         <Pane :size="centerSize">
           <Splitpanes
-            :key="`${bottomCollapsed}`"
+            :key="horizontalLayoutKey"
             horizontal
             :dbl-click-splitter="false"
           >
