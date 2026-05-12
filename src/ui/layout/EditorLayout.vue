@@ -15,13 +15,13 @@ import BottomTabs from './BottomTabs.vue'
 
     <div class="flex-1 overflow-hidden p-3">
       <Splitpanes class="h-full !bg-transparent" :dbl-click-splitter="false">
-        <Pane :size="18" :min-size="12" :max-size="26">
+        <Pane :size="22" :min-size="14" :max-size="32">
           <div class="h-full pr-2">
             <HierarchyPanel />
           </div>
         </Pane>
 
-        <Pane :size="68">
+        <Pane :size="64">
           <Splitpanes horizontal :dbl-click-splitter="false">
             <Pane :size="78" :min-size="55">
               <div class="h-full pb-2">
