@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { useSceneStore } from '../../stores/sceneStore'
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import TransformEditor from '../components/TransformEditor.vue'
 import MaterialEditor from '../components/MaterialEditor.vue'
+import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import UiPanel from '../primitives/UiPanel.vue'
 import UiPanelHeader from '../primitives/UiPanelHeader.vue'
+import UiIconButton from '../primitives/UiIconButton.vue'
 import UiInput from '../primitives/UiInput.vue'
 import UiToggle from '../primitives/UiToggle.vue'
+import { layoutContextKey } from '../layout/layoutContext'
 
 const scene = useSceneStore()
+const layout = inject(layoutContextKey, null)
+const isCollapsed = computed(() => layout?.rightCollapsed.value ?? false)
 
 const selectedNode = computed(() => scene.getSelectedNode())
 const isMesh = computed(() => selectedNode.value?.type === 'mesh')
@@ -17,7 +22,17 @@ const isMesh = computed(() => selectedNode.value?.type === 'mesh')
 <template>
   <UiPanel>
     <template #header>
-      <UiPanelHeader title="Inspector" />
+      <UiPanelHeader title="Inspector">
+        <template #actions>
+          <UiIconButton
+            v-if="layout"
+            :title="isCollapsed ? 'Expand panel' : 'Collapse panel'"
+            @click="layout.toggleRight()"
+          >
+            <component :is="isCollapsed ? ChevronLeft : ChevronRight" :size="16" />
+          </UiIconButton>
+        </template>
+      </UiPanelHeader>
     </template>
 
     <div class="flex-1 overflow-y-auto">

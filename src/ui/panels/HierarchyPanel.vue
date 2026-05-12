@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { useSceneStore, type SceneNode } from '../../stores/sceneStore'
-import { Eye, EyeOff, ChevronRight, ChevronDown, Trash2 } from 'lucide-vue-next'
-import { ref } from 'vue'
+import { Eye, EyeOff, ChevronRight, ChevronDown, ChevronLeft, Trash2 } from 'lucide-vue-next'
+import { computed, inject, ref } from 'vue'
 import UiPanel from '../primitives/UiPanel.vue'
 import UiPanelHeader from '../primitives/UiPanelHeader.vue'
 import UiIconButton from '../primitives/UiIconButton.vue'
+import { layoutContextKey } from '../layout/layoutContext'
 
 const scene = useSceneStore()
+const layout = inject(layoutContextKey, null)
+const isCollapsed = computed(() => layout?.leftCollapsed.value ?? false)
 const expandedNodes = ref<Set<string>>(new Set())
 const dragNodeId = ref<string | null>(null)
 const dragOverNodeId = ref<string | null>(null)
@@ -64,6 +67,13 @@ function onDropRoot(e: DragEvent) {
     <template #header>
       <UiPanelHeader title="Hierarchy">
         <template #actions>
+          <UiIconButton
+            v-if="layout"
+            :title="isCollapsed ? 'Expand panel' : 'Collapse panel'"
+            @click="layout.toggleLeft()"
+          >
+            <component :is="isCollapsed ? ChevronRight : ChevronLeft" :size="16" />
+          </UiIconButton>
           <UiIconButton
             v-if="scene.selectedNodeId"
             title="Delete selected"
