@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+  --color-editor-bg: #1e1e2e;
+  --color-editor-surface: #252536;
+  --color-editor-panel: #181825;
+  --color-editor-hover: #313244;
+  --color-editor-active: #45475a;
+  --color-editor-border: #313244;
+  --color-editor-text: #cdd6f4;
+  --color-editor-text-secondary: #a6adc8;
+  --color-editor-text-muted: #6c7086;
+  --color-editor-accent: #89b4fa;
+  --color-editor-accent-hover: #74c7ec;
+  --color-editor-warning: #f9e2af;
+  --color-editor-error: #f38ba8;
+  --color-editor-success: #a6e3a1;
+}
+
+html, body, #app {
+  @apply w-full h-full overflow-hidden bg-editor-bg text-editor-text;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { @apply bg-editor-active rounded; }
+::-webkit-scrollbar-thumb:hover { @apply bg-editor-text-muted; }
+
+.splitpanes__splitter {
+  @apply !bg-editor-border relative;
+}
+.splitpanes__splitter:hover {
+  @apply !bg-editor-accent;
+}
+.splitpanes--vertical > .splitpanes__splitter {
+  width: 3px !important;
+  min-width: 3px !important;
+}
+.splitpanes--horizontal > .splitpanes__splitter {
+  height: 3px !important;
+  min-height: 3px !important;
+}
