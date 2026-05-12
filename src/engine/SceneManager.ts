@@ -3,7 +3,7 @@ import { Engine } from '@babylonjs/core/Engines/engine'
 import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight'
 import { DirectionalLight } from '@babylonjs/core/Lights/directionalLight'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector'
-import { Color4 } from '@babylonjs/core/Maths/math.color'
+import { Color4, Color3 } from '@babylonjs/core/Maths/math.color'
 
 export class SceneManager {
   public scene: Scene
@@ -11,7 +11,7 @@ export class SceneManager {
   constructor(engine: Engine) {
     this.scene = new Scene(engine)
     this.scene.clearColor = new Color4(0.12, 0.12, 0.18, 1)
-    this.scene.ambientColor = new Color4(0.1, 0.1, 0.1, 1).toLinearSpace()
+    this.scene.ambientColor = new Color3(0.1, 0.1, 0.1).toLinearSpace()
 
     // Ambient light
     const hemiLight = new HemisphericLight('hemiLight', new Vector3(0, 1, 0), this.scene)

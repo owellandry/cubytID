@@ -151,19 +151,17 @@ onBeforeUnmount(() => {
 <template>
   <div
     ref="containerRef"
-    class="w-full h-full relative overflow-hidden bg-editor-bg"
+    class="w-full h-full relative overflow-hidden bg-editor-panel border border-editor-border/70 rounded-[var(--radius-2)] shadow-[var(--shadow-1)]"
     @drop="onDrop"
     @dragover="onDragOver"
   >
     <canvas ref="canvasRef" class="w-full h-full outline-none block" />
-    <!-- Viewport overlay info -->
-    <div class="absolute top-2 left-2 text-xs text-editor-text-muted pointer-events-none select-none">
+    <div class="absolute top-3 left-3 text-sm text-editor-text-muted pointer-events-none select-none">
       Perspective
     </div>
-    <!-- Play mode indicator -->
     <div
       v-if="editorStore.mode === 'play'"
-      class="absolute top-2 left-1/2 -translate-x-1/2 px-4 py-1 bg-editor-error/80 text-white text-xs font-bold rounded-full"
+      class="absolute top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-editor-error/85 text-white text-sm font-semibold rounded-full"
     >
       ▶ PLAY MODE
     </div>

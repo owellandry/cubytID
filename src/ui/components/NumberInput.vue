@@ -69,7 +69,7 @@ function onPointerUp() {
       :value="displayValue"
       :step="step || 0.1"
       @input="onInput"
-      class="flex-1 w-full min-w-0 px-1.5 py-0.5 text-xs bg-editor-surface border border-editor-border rounded text-editor-text focus:border-editor-accent outline-none cursor-ew-resize"
+      class="flex-1 w-full min-w-0 px-1.5 py-0.5 text-xs bg-editor-surface border border-editor-border rounded text-editor-text focus:border-editor-accent outline-none focus-visible:[box-shadow:var(--focus-ring)] cursor-ew-resize"
     />
   </div>
 </template>

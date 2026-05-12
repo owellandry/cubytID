@@ -2,17 +2,20 @@
 import { useEditorStore, type EditorTool } from '../../stores/editorStore'
 import { useSceneStore } from '../../stores/sceneStore'
 import { useProjectStore } from '../../stores/projectStore'
+import { useUiStore } from '../../stores/uiStore'
 import {
   MousePointer2, Move, RotateCw, Maximize2,
-  Play, Square, Globe, Box, Save,
-  Undo2, Redo2, Download, Upload, Trash2
+  Play, Square, Globe, Box, Save, Upload, Sun, Moon,
+  Undo2, Redo2
 } from 'lucide-vue-next'
 import CreateMenu from '../components/CreateMenu.vue'
 import { Project } from '../../core/Project'
+import UiIconButton from '../primitives/UiIconButton.vue'
 
 const editor = useEditorStore()
 const scene = useSceneStore()
 const project = useProjectStore()
+const ui = useUiStore()
 
 const tools: { id: EditorTool; icon: any; label: string; shortcut: string }[] = [
   { id: 'select', icon: MousePointer2, label: 'Select', shortcut: 'Q' },
@@ -60,95 +63,83 @@ if (typeof window !== 'undefined') {
 </script>
 
 <template>
-  <div class="h-10 flex items-center px-2 gap-1 bg-editor-panel border-b border-editor-border select-none">
-    <!-- Logo -->
-    <div class="flex items-center gap-2 px-2 mr-2">
+  <div class="h-12 flex items-center px-3 gap-2 bg-editor-panel border-b border-editor-border/70 select-none">
+    <div class="flex items-center gap-2 pr-2">
       <Box :size="18" class="text-editor-accent" />
-      <span class="text-sm font-semibold text-editor-text">CubytID</span>
+      <div class="leading-tight">
+        <div class="text-sm font-semibold text-editor-text">CubytID</div>
+        <div class="text-xs text-editor-text-muted">{{ project.projectName }}</div>
+      </div>
     </div>
 
-    <div class="w-px h-5 bg-editor-border mx-1" />
+    <div class="w-px h-6 bg-editor-border/70" />
 
-    <!-- Tools -->
-    <div class="flex items-center gap-0.5">
-      <button
+    <div class="flex items-center gap-1">
+      <UiIconButton
         v-for="tool in tools"
         :key="tool.id"
-        @click="editor.setTool(tool.id)"
         :title="`${tool.label} (${tool.shortcut})`"
-        class="p-1.5 rounded transition-colors"
-        :class="editor.activeTool === tool.id
-          ? 'bg-editor-accent text-editor-bg'
-          : 'text-editor-text-secondary hover:bg-editor-hover hover:text-editor-text'"
+        :pressed="editor.activeTool === tool.id"
+        @click="editor.setTool(tool.id)"
       >
         <component :is="tool.icon" :size="16" />
-      </button>
+      </UiIconButton>
     </div>
 
-    <div class="w-px h-5 bg-editor-border mx-1" />
+    <div class="w-px h-6 bg-editor-border/70" />
 
-    <!-- Space toggle -->
-    <button
+    <UiIconButton
       @click="editor.toggleSpace()"
       :title="editor.isWorldSpace ? 'World Space' : 'Local Space'"
-      class="p-1.5 rounded text-editor-text-secondary hover:bg-editor-hover hover:text-editor-text transition-colors"
     >
       <Globe :size="16" />
-    </button>
-    <span class="text-[10px] text-editor-text-muted">{{ editor.isWorldSpace ? 'World' : 'Local' }}</span>
+    </UiIconButton>
 
-    <div class="w-px h-5 bg-editor-border mx-1" />
+    <div class="w-px h-6 bg-editor-border/70" />
 
-    <!-- Create Menu -->
     <CreateMenu />
 
-    <div class="w-px h-5 bg-editor-border mx-1" />
+    <div class="w-px h-6 bg-editor-border/70" />
 
-    <!-- Undo / Redo -->
-    <button
+    <UiIconButton
       @click="scene.engineInstance?.history.undo()"
       :disabled="!editor.canUndo"
       title="Undo (Ctrl+Z)"
-      class="p-1.5 rounded transition-colors"
-      :class="editor.canUndo ? 'text-editor-text-secondary hover:bg-editor-hover' : 'text-editor-active cursor-not-allowed'"
     >
       <Undo2 :size="16" />
-    </button>
-    <button
+    </UiIconButton>
+    <UiIconButton
       @click="scene.engineInstance?.history.redo()"
       :disabled="!editor.canRedo"
       title="Redo (Ctrl+Shift+Z)"
-      class="p-1.5 rounded transition-colors"
-      :class="editor.canRedo ? 'text-editor-text-secondary hover:bg-editor-hover' : 'text-editor-active cursor-not-allowed'"
     >
       <Redo2 :size="16" />
-    </button>
+    </UiIconButton>
 
-    <!-- Spacer -->
     <div class="flex-1" />
 
-    <!-- Play controls -->
-    <div class="flex items-center gap-0.5">
-      <button
-        @click="editor.setMode(editor.mode === 'play' ? 'edit' : 'play')"
-        :title="editor.mode === 'play' ? 'Stop' : 'Play'"
-        class="p-1.5 rounded transition-colors"
-        :class="editor.mode === 'play'
-          ? 'bg-editor-error text-white'
-          : 'text-editor-success hover:bg-editor-hover'"
-      >
-        <component :is="editor.mode === 'play' ? Square : Play" :size="16" />
-      </button>
-    </div>
+    <UiIconButton
+      :title="ui.theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
+      @click="ui.toggleTheme()"
+    >
+      <component :is="ui.theme === 'dark' ? Sun : Moon" :size="16" />
+    </UiIconButton>
 
-    <div class="w-px h-5 bg-editor-border mx-1" />
+    <div class="w-px h-6 bg-editor-border/70" />
 
-    <!-- File operations -->
-    <button @click="loadProject" title="Open Project" class="p-1.5 rounded text-editor-text-secondary hover:bg-editor-hover hover:text-editor-text transition-colors">
+    <UiIconButton @click="loadProject" title="Open Project">
       <Upload :size="16" />
-    </button>
-    <button @click="saveProject" title="Save (Ctrl+S)" class="p-1.5 rounded text-editor-text-secondary hover:bg-editor-hover hover:text-editor-text transition-colors">
+    </UiIconButton>
+    <UiIconButton @click="saveProject" title="Save (Ctrl+S)">
       <Save :size="16" />
-    </button>
+    </UiIconButton>
+
+    <UiIconButton
+      @click="editor.setMode(editor.mode === 'play' ? 'edit' : 'play')"
+      :title="editor.mode === 'play' ? 'Stop' : 'Play'"
+      :variant="editor.mode === 'play' ? 'danger' : 'ghost'"
+    >
+      <component :is="editor.mode === 'play' ? Square : Play" :size="16" />
+    </UiIconButton>
   </div>
 </template>
