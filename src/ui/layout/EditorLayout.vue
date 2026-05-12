@@ -54,7 +54,11 @@ provide(layoutContextKey, {
     <Toolbar />
 
     <div class="flex-1 overflow-hidden p-3">
-      <Splitpanes class="h-full !bg-transparent" :dbl-click-splitter="false">
+      <Splitpanes
+        :key="`${leftCollapsed}-${rightCollapsed}`"
+        class="h-full !bg-transparent"
+        :dbl-click-splitter="false"
+      >
         <Pane :size="leftSize" :min-size="leftMin" :max-size="leftMax">
           <div class="h-full pr-2">
             <HierarchyPanel />
@@ -62,7 +66,11 @@ provide(layoutContextKey, {
         </Pane>
 
         <Pane :size="centerSize">
-          <Splitpanes horizontal :dbl-click-splitter="false">
+          <Splitpanes
+            :key="`${bottomCollapsed}`"
+            horizontal
+            :dbl-click-splitter="false"
+          >
             <Pane :size="viewportSize" :min-size="55">
               <div class="h-full pb-2">
                 <ViewportPanel />
